@@ -6,10 +6,21 @@ Yêu cầu:
   • App vẫn phải KHỞI ĐỘNG ĐƯỢC khi Redis chưa sẵn sàng (đừng ping Redis lúc import)
   • redis_healthy() dùng cho GET /ready: Redis không kết nối được → False
 """
+import redis
 
-r = None  # TODO: tạo client, vd redis.from_url(settings.redis_url, decode_responses=True)
+from app.config import settings
+
+r = redis.from_url(
+    settings.redis_url,
+    decode_responses=True,
+    socket_connect_timeout=1.0,
+    socket_timeout=1.0,
+)
 
 
 def redis_healthy() -> bool:
-    # TODO: ping Redis; lỗi kết nối → False
-    return False
+    """Kiểm tra kết nối Redis cho GET /ready."""
+    try:
+        return bool(r.ping())
+    except Exception:
+        return False
